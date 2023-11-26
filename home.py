@@ -10,10 +10,6 @@ def load_lottieurl(url):
         return None
     return r.json()
 
-def local_css(styles):
-    with open(styles) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 # Load Lottie animations
 lottie_hello = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_FYx0Ph.json")
 music = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_ikk4jhps.json")
@@ -26,9 +22,6 @@ img_lottie_animation = Image.open("home.jpg")
 # Set page configuration
 st.set_page_config(page_title="Fitness Trainer", page_icon=":tada:", layout="wide")
 
-# Load local CSS
-local_css("styles.css")
-
 # Sidebar navigation with hyperlinks
 page_links = {
     "main": "main",
@@ -36,7 +29,28 @@ page_links = {
     "Train": "Train",
     "Chatbot": "Chatbot",
     "Nutrition": "Nutrition",
+    "diet": "diet"
 }
+
+# Apply custom CSS styles
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+    .sidebar .css-ewapu8 {
+        background-color: #4285f4;
+        color: white;
+    }
+    .sidebar .css-ewapu8:hover {
+        background-color: #1656a3;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 selected_page = st.sidebar.radio("Select a page", list(page_links.keys()))
 
@@ -45,9 +59,9 @@ if selected_page == "main":
 
     # Main content
     with st.container():
-       st.subheader("Hello, welcome to our website :wave:")
-       st.title("AI Fitness Trainer")
-       st.write("Step into a fitter future: Welcome to your fitness revolution!")
+        st.subheader("Hello, welcome to our website :wave:")
+        st.title("AI Fitness Trainer")
+        st.write("Step into a fitter future: Welcome to your fitness revolution!")
 
     # About us section
     with st.container():
@@ -115,7 +129,7 @@ if selected_page == "main":
             <input type="text" name="name" placeholder="Your name" required>
             <input type="email" name="email" placeholder="Your email" required>
             <textarea name="message" placeholder="Your message here" required></textarea>
-            <button type="submit">Send</button>
+            <button type="submit" style="background-color: #4285f4; color: white;">Send</button>
         </form>
         """
         left_column, right_column = st.columns(2)
@@ -1241,7 +1255,7 @@ elif selected_page == "Chatbot":
         text.markdown(str("\n".join(messages_str)), unsafe_allow_html=True)
 
 
-    openai.api_key = "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"
+    openai.api_key = "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"
 
     BASE_PROMPT = [{"role": "system", 'content': """
     You are Donnie, an automated Gym assistant to provide workout routines for the users and give suggestions. \
@@ -1349,3 +1363,57 @@ elif selected_page == "Nutrition":
 
     except:
         st.write("")
+
+elif selected_page == "diet":
+    st.title("fitness plan")
+
+    import openai
+    import streamlit as st
+
+    # Set your OpenAI GPT-3 API key
+    openai.api_key = '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'
+
+
+    # Function to generate workout and diet plans using GPT-3
+    def generate_fitness_plan(height, weight, fitness_goal):
+        prompt = f"Create a personalized workout and diet plan for an individual with the following characteristics:\n\n\
+    - Height: {height} cm\n\
+    - Weight: {weight} kg\n\
+    - Fitness Goal: {fitness_goal}\n\n\
+    Consider the following details when providing the plans:\n\n\
+    1. **Workout Plan:** Include specific exercises, sets, and repetitions. Tailor the plan based on the individual's fitness goal.\n\n\
+    2. **Diet Plan:** Suggest a daily meal plan with details on the type and quantity of food. Consider nutritional requirements based on the fitness goal.\n\n\
+    Provide a detailed and actionable plan for the user."
+
+        response = openai.Completion.create(
+            engine="text-davinci-002",  # You can experiment with different engines
+            prompt=prompt,
+            max_tokens=2000,  # Adjust based on desired response length
+            temperature=0.7,  # Adjust for randomness (higher values for more randomness)
+            stop=None  # You can customize stop criteria for the response
+        )
+        return response.choices[0].text.strip()
+
+
+    # Streamlit web app
+    def main():
+        st.title("Fitness Planner")
+
+        # User input for height, weight, and fitness goal
+        height = st.slider("Select your height (in cm):", 100, 250, 170)
+        weight = st.slider("Select your weight (in kg):", 30, 200, 70)
+        fitness_goal = st.radio("Select your fitness goal:", ["Weight Loss", "Muscle Gain", "Maintain Fitness"])
+
+        # Button to trigger the fitness plan generation
+        if st.button("Get Your Plan"):
+            # Call the GPT-3 function
+            fitness_plan = generate_fitness_plan(height, weight, fitness_goal)
+
+            # Display the generated plan
+            st.subheader("Your Personalized Fitness Plan:")
+            st.write(fitness_plan)
+
+
+    # Run the Streamlit app
+    if __name__ == "__main__":
+        main()
